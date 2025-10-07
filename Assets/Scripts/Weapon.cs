@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public GameObject bulletPrefab;
-    public Camera playerCamera;
     public AudioClip gunFireSound;
     bool allowReset = true;
     public int currentBurst;
@@ -18,10 +16,8 @@ public class Weapon : MonoBehaviour
     private float lastFireTime = -0.1f;
 
     // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKey(KeyCode.Mouse0) && Time.time - lastFireTime > delayTime)
-        {
+    public void PressShoot(){
+        if (Time.time - lastFireTime > delayTime) {
             FireWeapon();
             lastFireTime = Time.time;
         }
