@@ -4,37 +4,50 @@ using UnityEngine;
 
 public class Weapon : MonoBehaviour
 {
-    public GameObject bulletPrefab;
-    public Camera playerCamera;
-
-    bool allowReset = true;
-    public int currentBurst;
 
     public Transform bulletSpawn;
-    public float bulletVelocity = 30f;
-    public float bulletPrefacLifeTime = 3f;
+    public float bulletSpeed = 100f;
+    public float delayTime = 0.1f;
+    public TrailRenderer bulletTrail;
+    private float lastFireTime = -0.1f;
 
     // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Mouse0)) {
+    void Update(){
+        if (Input.GetKey(KeyCode.Mouse0) && Time.time - lastFireTime > delayTime) {
             FireWeapon();
+            lastFireTime = Time.time;
         }
     }
 
-    private void FireWeapon()
-    {
-        GameObject bullet = Instantiate(bulletPrefab, bulletSpawn.position, Quaternion.identity);
-
-        //shoot
-        bullet.GetComponent<Rigidbody>().AddForce(bulletSpawn.forward.normalized * bulletVelocity, ForceMode.Impulse);
-        //Destroy after some time
-        StartCoroutine(DestroyBulletAfterTime(bullet, bulletPrefacLifeTime));
+    private void FireWeapon(){
+        TrailRenderer trail = Instantiate(bulletTrail, bulletSpawn.position, transform.rotation);
+        if (Physics.Raycast(bulletSpawn.position, bulletSpawn.forward, out RaycastHit hitInfo)){
+            StartCoroutine(SpawnTrail(trail, hitInfo));
+        }else{
+            StartCoroutine(SpawnTrail(trail, null));
+        }
     }
-
-    private IEnumerator DestroyBulletAfterTime(GameObject bullet, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        Destroy(bullet);
+        
+    private IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit? hitInfo){
+        float time = 0;
+        Vector3 startPosition = trail.transform.position;
+        Vector3 endPosition;
+        if (hitInfo.HasValue){
+            endPosition = hitInfo.Value.point;
+        }else{
+            endPosition = trail.transform.position + trail.transform.forward * 1000f;
+        }
+        float trailTime = Vector3.Distance(startPosition, endPosition) / bulletSpeed;
+        while (time < 1){
+            trail.transform.position = Vector3.Lerp(startPosition, endPosition, time);
+            time += Time.deltaTime / trailTime;
+            yield return null;
+        }
+        trail.transform.position = endPosition;
+        if (hitInfo.HasValue){
+            // Add impact effect here
+            Debug.Log("Hit: " + hitInfo.Value.collider.name);
+        }
+        Destroy(trail.gameObject);
     }
 }
