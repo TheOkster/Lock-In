@@ -58,6 +58,15 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
+    public void jump()
+    {
+        if (isGrounded && !jumping)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumping = true;
+        }
+    }
+
     public void upDownTurn(float turnAngle)
     {
         Vector3 localAxis = chest.parent.InverseTransformDirection(cameraTransform.right);
@@ -74,9 +83,10 @@ public class PlayerMovement : MonoBehaviour
     {
         float speedRatio = isRunning ? 1 : 0.5f;
         controller.Move(direction * maxSpeed * speedRatio * Time.deltaTime);
+
         if (direction.magnitude > 0)
         {
-            if (curStepTime > stepPeriod)
+           if (curStepTime > stepPeriod)
             {
                 PlayFootstep();
                 curStepTime = 0f;
@@ -84,20 +94,11 @@ public class PlayerMovement : MonoBehaviour
             else
             {
                 curStepTime += Time.deltaTime;
-            }
+            } 
         }
         else
         {
             curStepTime = 0f;
-        }
-    }
-
-    public void jump()
-    {
-        if (isGrounded && !jumping)
-        {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            jumping = true;
         }
     }
 
