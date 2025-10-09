@@ -18,7 +18,7 @@ public class PlayerMovement : NetworkBehaviour
     public LayerMask groundMask;
     private AudioListener otherAudioListener;
     public float stepPeriod = 0.75f;
-    public float curStepTime = 0f;
+    private float curStepTime = 0f;
 
     public Transform cameraTransform;
     private float leftRightAngle = 0f;
@@ -99,7 +99,7 @@ public class PlayerMovement : NetworkBehaviour
     public void move(Vector3 direction, bool isRunning)
     {
         float speedRatio = isRunning ? 1 : 0.5f;
-        controller.Move(direction * maxSpeed * speedRatio * Time.deltaTime);
+        controller.Move(cameraTransform.TransformDirection(direction) * maxSpeed * speedRatio * Time.deltaTime);
 
         if (direction.magnitude > 0)
         {
@@ -129,6 +129,6 @@ public class PlayerMovement : NetworkBehaviour
     public void leftRightTurn(float turnAngle)
     {
         leftRightAngle += turnAngle;
-        transform.localRotation = Quaternion.Euler(0, leftRightAngle, 0f);
+        transform.rotation = Quaternion.Euler(0, leftRightAngle, 0f);
     }
 }
