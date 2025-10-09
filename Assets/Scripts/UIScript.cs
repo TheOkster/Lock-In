@@ -1,4 +1,6 @@
+using TMPro;
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,6 +8,10 @@ public class UIScript : MonoBehaviour
 {
     [SerializeField] private Button hostButton;
     [SerializeField] private Button clientButton;
+
+    [SerializeField] TextMeshProUGUI input;
+    private UnityTransport transport;
+    [SerializeField] public string ipAddress = "127.0.0.1";
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -33,6 +39,10 @@ public class UIScript : MonoBehaviour
     }
     private void ClientButtonOnClick()
     {
+        ipAddress = input.text;
+        transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.ConnectionData.Address = ipAddress;
+
         NetworkManager.Singleton.StartClient();
     }
 }
