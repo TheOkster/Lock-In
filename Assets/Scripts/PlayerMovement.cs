@@ -1,20 +1,22 @@
 using Unity.Mathematics;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public AudioSource audioSource;
     public AudioClip[] footstepSounds;
     private CharacterController controller;
     private Animator animator;
+    public Camera camera;
     public float maxSpeed = 12f;
     public float gravity = 9.81f * -2;
     public float jumpHeight = 3f;
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
-
+    private AudioListener otherAudioListener;
     public float stepPeriod = 0.75f;
     public float curStepTime = 0f;
 
@@ -29,19 +31,34 @@ public class PlayerMovement : MonoBehaviour
     float upDownAngle = 0f;
     public float topClamp = -90f;
     public float bottomClamp = 90f;
-
-    void Start()
+    public override void OnNetworkSpawn()
     {
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
         chest = animator.GetBoneTransform(HumanBodyBones.Chest);
         torsoRotation = chest.localRotation; 
         upDownAngle = cameraTransform.rotation.eulerAngles.x;
+
+        if (!IsOwner)
+        {
+            otherAudioListener = camera.GetComponent<AudioListener>();
+            camera.enabled = false;
+            otherAudioListener.enabled = false;
+        }
+        else
+        {
+            camera.enabled = true;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner)
+        {
+            return;
+            //cameraTransform.enabled = false;
+        }
         // Ground check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (isGrounded && velocity.y < 0)
