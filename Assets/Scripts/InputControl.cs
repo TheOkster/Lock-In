@@ -1,6 +1,7 @@
+using Unity.Netcode;
 using UnityEngine;
 
-public class MouseMovement : MonoBehaviour
+public class MouseMovement : NetworkBehaviour
 {
     public float mouseSensitivity = 250f;
     public GameObject playerBody;
@@ -11,12 +12,15 @@ public class MouseMovement : MonoBehaviour
     {
         // Lock cursor and making it invisible
         Cursor.lockState = CursorLockMode.Locked;
-
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner)
+        {
+            return;
+        }
         // Mouse movement
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float yRotation = mouseX;
@@ -48,4 +52,3 @@ public class MouseMovement : MonoBehaviour
         playerBody.GetComponent<PlayerMovement>().upDownTurn(xRotation);
     }
 }
-

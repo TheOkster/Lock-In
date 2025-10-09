@@ -6,12 +6,19 @@ using UnityEngine.UI;
 
 public class UIScript : MonoBehaviour
 {
-    [SerializeField] private Button hostButton;
-    [SerializeField] private Button clientButton;
+    [SerializeField]
+    private Button hostButton;
 
-    [SerializeField] TextMeshProUGUI input;
+    [SerializeField]
+    private Button clientButton;
+
+    [SerializeField]
+    TextMeshProUGUI input;
     private UnityTransport transport;
-    [SerializeField] public string ipAddress = "127.0.0.1";
+
+    [SerializeField]
+    public string ipAddress = "127.0.0.1";
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -19,29 +26,30 @@ public class UIScript : MonoBehaviour
         clientButton.onClick.AddListener(ClientButtonOnClick);
 
         var c = GetComponent<Canvas>();
-        if (!c) return;
+        if (!c)
+            return;
         c.renderMode = RenderMode.ScreenSpaceOverlay;
         c.targetDisplay = 0; // Display 1 in the inspector
         var g = GetComponent<CanvasGroup>();
-        if (g) g.alpha = 1f;
+        if (g)
+            g.alpha = 1f;
         gameObject.SetActive(true);
         Debug.Log($"[UI] Display:{c.targetDisplay} Res:{Screen.width}x{Screen.height}");
     }
+
     // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    void Update() { }
 
     private void HostButtonOnClick()
     {
         NetworkManager.Singleton.StartHost();
     }
+
     private void ClientButtonOnClick()
     {
-        ipAddress = input.text;
-        transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        transport.ConnectionData.Address = ipAddress;
+        // ipAddress = input.text;
+        // transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        // transport.ConnectionData.Address = ipAddress;
 
         NetworkManager.Singleton.StartClient();
     }
