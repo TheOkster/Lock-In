@@ -2069,7 +2069,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hostButton: {fileID: 935594247}
   clientButton: {fileID: 1529181338}
-  input: {fileID: 0}
+  input: {fileID: 1599758154}
   ipAddress: 127.0.0.1
 --- !u!114 &1778146042
 MonoBehaviour:
