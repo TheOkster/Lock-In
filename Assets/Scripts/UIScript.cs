@@ -47,9 +47,12 @@ public class UIScript : MonoBehaviour
 
     private void ClientButtonOnClick()
     {
-        // ipAddress = input.text;
-        // transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-        // transport.ConnectionData.Address = ipAddress;
+        ipAddress = input.text.Trim();
+        ipAddress = ipAddress.Replace("\u200B", "");  
+        ipAddress = ipAddress.Replace("\u00A0", "");      
+        ipAddress = System.Text.RegularExpressions.Regex.Replace(ipAddress, @"\s+", "");
+        transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+        transport.ConnectionData.Address = ipAddress;
 
         NetworkManager.Singleton.StartClient();
     }
