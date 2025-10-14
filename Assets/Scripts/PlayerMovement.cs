@@ -1,87 +1,109 @@
 using Unity.Mathematics;
-using Unity.VisualScripting;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerMovement : NetworkBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public AudioSource audioSource;
     public AudioClip[] footstepSounds;
     private CharacterController controller;
-
-    public float baseSpeed = 12f;
-    private float speed;
+    private Animator animator;
+    public Camera camera;
+    public float maxSpeed = 12f;
     public float gravity = 9.81f * -2;
     public float jumpHeight = 3f;
-
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
-
+    private AudioListener otherAudioListener;
     public float stepPeriod = 0.75f;
-    public float curStepTime = 0f;
+    private float curStepTime = 0f;
 
+    public Transform cameraTransform;
+    private float leftRightAngle = 0f;
     Vector3 velocity;
-
     bool isGrounded;
-    bool isMoving = false;
+    bool jumping = false;
 
-    private Vector3 lastPosition = new Vector3(0f, 0f, 0f);
-
-    void Start()
+    Transform chest;
+    Quaternion torsoRotation;
+    float upDownAngle = 0f;
+    public float topClamp = -90f;
+    public float bottomClamp = 90f;
+    public override void OnNetworkSpawn()
     {
         controller = GetComponent<CharacterController>();
+        animator = GetComponent<Animator>();
+        chest = animator.GetBoneTransform(HumanBodyBones.Chest);
+        torsoRotation = chest.localRotation; 
+        upDownAngle = cameraTransform.rotation.eulerAngles.x;
+
+        if (!IsOwner)
+        {
+            otherAudioListener = camera.GetComponent<AudioListener>();
+            camera.enabled = false;
+            otherAudioListener.enabled = false;
+        }
+        else
+        {
+            camera.enabled = true;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner)
+        {
+            return;
+            //cameraTransform.enabled = false;
+        }
         // Ground check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         if (isGrounded && velocity.y < 0)
         {
             velocity.y = -2f;
         }
-
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
-
-        Vector3 move = transform.right * x + transform.forward * z;
-
-        if (Input.GetKey(KeyCode.LeftShift) && isGrounded)
+        if (jumping && !isGrounded) // already off ground
         {
-            speed = baseSpeed * 0.5f;
-        }
-        else
-        {
-            speed = baseSpeed;
+            jumping = false;
         }
 
-        controller.Move(move * speed * Time.deltaTime);
+        // Gravity and jumps
+        velocity.y += gravity * Time.deltaTime;
+        controller.Move(velocity * Time.deltaTime);
+    }
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+    public void jump()
+    {
+        if (isGrounded && !jumping)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumping = true;
         }
+    }
 
-        velocity.y += gravity * Time.deltaTime;
+    public void upDownTurn(float turnAngle)
+    {
+        Vector3 localAxis = chest.parent.InverseTransformDirection(cameraTransform.right);
+        // Create a rotation around that local axis
+        float newUpDownAngle = Mathf.Clamp(upDownAngle + turnAngle, topClamp, bottomClamp);
+        Quaternion rotation = Quaternion.AngleAxis(newUpDownAngle - upDownAngle, localAxis);
+        upDownAngle = newUpDownAngle;
+        // Apply rotation relative to parent
+        torsoRotation = rotation * torsoRotation;
+        chest.localRotation = torsoRotation;
+    }
 
-        controller.Move(velocity * Time.deltaTime);
+    public void move(Vector3 direction, bool isRunning)
+    {
+        float speedRatio = isRunning ? 1 : 0.5f;
+        controller.Move(cameraTransform.TransformDirection(direction) * maxSpeed * speedRatio * Time.deltaTime);
 
-        if (lastPosition != gameObject.transform.position && isGrounded)
+        if (direction.magnitude > 0)
         {
-            isMoving = true;
-        }
-        else
-        {
-            isMoving = false;
-        }
-
-        lastPosition = gameObject.transform.position;
-
-        if (isMoving)
-        {
-            if (curStepTime > stepPeriod)
+           if (curStepTime > stepPeriod)
             {
                 PlayFootstep();
                 curStepTime = 0f;
@@ -89,7 +111,7 @@ public class PlayerMovement : MonoBehaviour
             else
             {
                 curStepTime += Time.deltaTime;
-            }
+            } 
         }
         else
         {
@@ -102,5 +124,11 @@ public class PlayerMovement : MonoBehaviour
         audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
         int footstepInd = UnityEngine.Random.Range(0, footstepSounds.Length);
         audioSource.PlayOneShot(footstepSounds[footstepInd]);
+    }
+
+    public void leftRightTurn(float turnAngle)
+    {
+        leftRightAngle += turnAngle;
+        transform.rotation = Quaternion.Euler(0, leftRightAngle, 0f);
     }
 }
