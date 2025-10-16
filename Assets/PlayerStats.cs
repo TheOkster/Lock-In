@@ -2,16 +2,23 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStats : NetworkBehaviour
 {
-    public Slider healthSlider;
+    private Slider healthSlider;
     public NetworkVariable<int> health = new NetworkVariable<int>();
-    public int maxHealth;
+    private int maxHealth = 10;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        health.Value = maxHealth;
+    }
+
     void Start()
     {
+        healthSlider = FindFirstObjectByType<Slider>();
         healthSlider.maxValue = maxHealth;
+        healthSlider.value = maxHealth;
     }
 
     // Update is called once per frame
