@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class MouseMovement : NetworkBehaviour
 {
-    public float mouseSensitivity = 250f;
+    public float mouseSensitivity = 600f;
     public GameObject playerBody;
     public GameObject gunBody;
 
