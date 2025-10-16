@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Weapon : MonoBehaviour
 {
@@ -8,7 +9,6 @@ public class Weapon : MonoBehaviour
     bool allowReset = true;
     public int currentBurst;
     public AudioSource audioSource;
-
     public Transform bulletSpawn;
     public float bulletSpeed = 100f;
     public float delayTime = 0.1f;
@@ -16,8 +16,10 @@ public class Weapon : MonoBehaviour
     private float lastFireTime = -0.1f;
 
     // Update is called once per frame
-    public void PressShoot(){
-        if (Time.time - lastFireTime > delayTime) {
+    public void PressShoot()
+    {
+        if (Time.time - lastFireTime > delayTime)
+        {
             FireWeapon();
             lastFireTime = Time.time;
         }
@@ -61,8 +63,21 @@ public class Weapon : MonoBehaviour
         trail.transform.position = endPosition;
         if (hitInfo.HasValue)
         {
-            // Add impact effect here
-            Debug.Log("Hit: " + hitInfo.Value.collider.name);
+            var hitObject = hitInfo.Value.collider.gameObject;
+
+            // Check if it has a PlayerHealth component
+            if (hitObject.TryGetComponent<PlayerStats>(out PlayerStats playerStats))
+            {
+                Debug.Log("Hit a player!");
+
+                // Apply damage
+                playerStats.Damage(1);
+            }
+            else
+            {
+                // It’s not a player — maybe a wall or object
+                Debug.Log("Hit something else: " + hitObject.name);
+            }
         }
         Destroy(trail.gameObject);
     }
