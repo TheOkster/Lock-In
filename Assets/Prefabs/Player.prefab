@@ -827,16 +827,19 @@ MonoBehaviour:
   audioSource: {fileID: 8177562896308992115}
   footstepSounds:
   - {fileID: 8300000, guid: 1f0199a4c6005ec4abbb302f71bc036d, type: 3}
+  jumpSound: {fileID: 8300000, guid: 8420cf17e21d6354a98e6ef6d19dc9cc, type: 3}
+  landSound: {fileID: 8300000, guid: 3d8f480d252db9449b2f978284506f8e, type: 3}
   camera: {fileID: 6142840242104860522}
-  maxSpeed: 12
-  gravity: -19.62
-  jumpHeight: 3
+  maxSpeed: 5
+  gravity: -39.24
+  jumpHeight: 2
   groundCheck: {fileID: 9212095114578026711}
   groundDistance: 0.4
   groundMask:
     serializedVersion: 2
     m_Bits: 8
-  stepPeriod: 0.75
+  walkSoundPeriod: 0.6
+  runSoundPeriod: 0.45
   cameraTransform: {fileID: 3727499446993316621}
   topClamp: -40
   bottomClamp: 70

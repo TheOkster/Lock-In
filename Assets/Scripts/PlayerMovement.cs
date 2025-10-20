@@ -1,23 +1,27 @@
 using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
+using System;
 
 public class PlayerMovement : NetworkBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public AudioSource audioSource;
     public AudioClip[] footstepSounds;
+    public AudioClip jumpSound;
+    public AudioClip landSound;
     private CharacterController controller;
     private Animator animator;
     public Camera camera;
     public float maxSpeed = 12f;
-    public float gravity = 9.81f * -2;
+    public float gravity = 9.81f * -1;
     public float jumpHeight = 3f;
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
     private AudioListener otherAudioListener;
-    public float stepPeriod = 0.75f;
+    public float walkSoundPeriod = 0.4f;
+    public float runSoundPeriod = 0.3f;
     private float curStepTime = 0f;
 
     public Transform cameraTransform;
@@ -25,6 +29,7 @@ public class PlayerMovement : NetworkBehaviour
     Vector3 velocity;
     bool isGrounded;
     bool jumping = false;
+    bool in_air = false;
 
     Transform chest;
     Quaternion torsoRotation;
@@ -65,9 +70,16 @@ public class PlayerMovement : NetworkBehaviour
         {
             velocity.y = -2f;
         }
-        if (jumping && !isGrounded) // already off ground
+        if (!isGrounded && jumping) // in air
         {
+            in_air = true;
             jumping = false;
+        }
+        if (isGrounded && in_air) // landed
+        {
+            in_air = false;
+            audioSource.volume = 1f;
+            audioSource.PlayOneShot(landSound);
         }
 
         // Gravity and jumps
@@ -80,6 +92,8 @@ public class PlayerMovement : NetworkBehaviour
         if (isGrounded && !jumping)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            audioSource.volume = 1f;
+            audioSource.PlayOneShot(jumpSound);
             jumping = true;
         }
     }
@@ -98,12 +112,13 @@ public class PlayerMovement : NetworkBehaviour
 
     public void move(Vector3 direction, bool isRunning)
     {
-        float speedRatio = isRunning ? 1 : 0.5f;
+        float speedRatio = isRunning ? 1 : 0.7f;
         controller.Move(cameraTransform.TransformDirection(direction) * maxSpeed * speedRatio * Time.deltaTime);
+        audioSource.volume = isRunning ? 1.0f : 0.7f;
 
-        if (direction.magnitude > 0)
+        if (direction.magnitude > 0 && isGrounded)
         {
-           if (curStepTime > stepPeriod)
+           if (curStepTime > (isRunning ? runSoundPeriod : walkSoundPeriod))
             {
                 PlayFootstep();
                 curStepTime = 0f;
@@ -115,7 +130,7 @@ public class PlayerMovement : NetworkBehaviour
         }
         else
         {
-            curStepTime = 0f;
+            curStepTime = Math.Max(runSoundPeriod, walkSoundPeriod);
         }
     }
 
