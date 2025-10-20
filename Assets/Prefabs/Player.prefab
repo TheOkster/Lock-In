@@ -535,9 +535,10 @@ MonoBehaviour:
   currentBurst: 0
   audioSource: {fileID: 1350768994836273500}
   bulletSpawn: {fileID: 3763790219132942922}
-  bulletSpeed: 500
+  cameraTransform: {fileID: 3727499446993316621}
+  bulletSpeed: 100
   delayTime: 0.15
-  bulletTrail: {fileID: 3133330111600198543, guid: 183273abf272b4baabf9c5eb79795856, type: 3}
+  bulletTrail: {fileID: 7379652218115875337, guid: 183273abf272b4baabf9c5eb79795856, type: 3}
 --- !u!1 &7338173525350417725
 GameObject:
   m_ObjectHideFlags: 0
@@ -836,7 +837,6 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   stepPeriod: 0.75
-  curStepTime: 0
   cameraTransform: {fileID: 3727499446993316621}
   topClamp: -40
   bottomClamp: 70
@@ -913,6 +913,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c954b9e85dd7cf4a8297f4bc148fb80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   mouseSensitivity: 250
   playerBody: {fileID: 7778357587898369205}
   gunBody: {fileID: 4837108563139474700}
@@ -974,7 +975,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9a3e31f5e2f720f4080bebec7385e066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HealthPoints:
+  ShowTopMostFoldoutHeaderGroup: 1
+  health:
     m_InternalValue: 0
 --- !u!4 &9117117537124042284 stripped
 Transform:

@@ -10,9 +10,10 @@ public class Weapon : MonoBehaviour
     public int currentBurst;
     public AudioSource audioSource;
     public Transform bulletSpawn;
+    public Transform cameraTransform;
     public float bulletSpeed = 100f;
     public float delayTime = 0.1f;
-    public TrailRenderer bulletTrail;
+    public GameObject bulletTrail;
     private float lastFireTime = -0.1f;
 
     // Update is called once per frame
@@ -27,57 +28,35 @@ public class Weapon : MonoBehaviour
 
     private void FireWeapon()
     {
-        TrailRenderer trail = Instantiate(bulletTrail, bulletSpawn.position, transform.rotation);
-        if (Physics.Raycast(bulletSpawn.position, bulletSpawn.forward, out RaycastHit hitInfo))
+        GameObject trail = Instantiate(bulletTrail, bulletSpawn.position, transform.rotation);
+        if (Physics.Raycast(cameraTransform.position, cameraTransform.forward, out RaycastHit hitInfo))
         {
-            StartCoroutine(SpawnTrail(trail, hitInfo));
+            StartCoroutine(SpawnTrail(trail, hitInfo.point));
+            if (hitInfo.collider.TryGetComponent<PlayerStats>(out PlayerStats playerStats))
+            {
+                Debug.Log("Hit a player!");
+                playerStats.Damage(1);
+            }
         }
         else
         {
-            StartCoroutine(SpawnTrail(trail, null));
+            StartCoroutine(SpawnTrail(trail, cameraTransform.position + cameraTransform.forward * 1000f));
         }
         audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
         audioSource.PlayOneShot(gunFireSound);
     }
 
-    private IEnumerator SpawnTrail(TrailRenderer trail, RaycastHit? hitInfo)
+    private IEnumerator SpawnTrail(GameObject trail, Vector3 endPosition)
     {
         float time = 0;
         Vector3 startPosition = trail.transform.position;
-        Vector3 endPosition;
-        if (hitInfo.HasValue)
-        {
-            endPosition = hitInfo.Value.point;
-        }
-        else
-        {
-            endPosition = trail.transform.position + trail.transform.forward * 1000f;
-        }
+        endPosition = endPosition + (endPosition - startPosition).normalized * 0.5f;
         float trailTime = Vector3.Distance(startPosition, endPosition) / bulletSpeed;
         while (time < 1)
         {
             trail.transform.position = Vector3.Lerp(startPosition, endPosition, time);
             time += Time.deltaTime / trailTime;
             yield return null;
-        }
-        trail.transform.position = endPosition;
-        if (hitInfo.HasValue)
-        {
-            var hitObject = hitInfo.Value.collider.gameObject;
-
-            // Check if it has a PlayerHealth component
-            if (hitObject.TryGetComponent<PlayerStats>(out PlayerStats playerStats))
-            {
-                Debug.Log("Hit a player!");
-
-                // Apply damage
-                playerStats.Damage(1);
-            }
-            else
-            {
-                // It’s not a player — maybe a wall or object
-                Debug.Log("Hit something else: " + hitObject.name);
-            }
         }
         Destroy(trail.gameObject);
     }
