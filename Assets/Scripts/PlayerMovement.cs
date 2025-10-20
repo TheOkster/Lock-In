@@ -29,7 +29,7 @@ public class PlayerMovement : NetworkBehaviour
     Vector3 velocity;
     bool isGrounded;
     bool jumping = false;
-    bool in_air = false;
+    bool inAir = false;
 
     Transform chest;
     Quaternion torsoRotation;
@@ -72,12 +72,12 @@ public class PlayerMovement : NetworkBehaviour
         }
         if (!isGrounded && jumping) // in air
         {
-            in_air = true;
+            inAir = true;
             jumping = false;
         }
-        if (isGrounded && in_air) // landed
+        if (isGrounded && inAir) // landed
         {
-            in_air = false;
+            inAir = false;
             audioSource.volume = 1f;
             audioSource.PlayOneShot(landSound);
         }
@@ -100,6 +100,7 @@ public class PlayerMovement : NetworkBehaviour
 
     public void upDownTurn(float turnAngle)
     {
+        if (!IsOwner) return;
         Vector3 localAxis = chest.parent.InverseTransformDirection(cameraTransform.right);
         // Create a rotation around that local axis
         float newUpDownAngle = Mathf.Clamp(upDownAngle + turnAngle, topClamp, bottomClamp);
