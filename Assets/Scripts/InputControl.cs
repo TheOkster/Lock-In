@@ -1,6 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
-
+using UnityEngine.EventSystems;
 public class MouseMovement : NetworkBehaviour
 {
     public float mouseSensitivity = 600f;
@@ -28,7 +28,7 @@ public class MouseMovement : NetworkBehaviour
 
         // Shooting
         bool shoot = Input.GetKey(KeyCode.Mouse0);
-        if (shoot)
+        if (shoot&&!EventSystem.current.IsPointerOverGameObject())
         {
             gunBody.GetComponent<Weapon>().PressShoot();
         }
