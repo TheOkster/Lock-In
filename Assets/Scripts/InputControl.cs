@@ -43,6 +43,12 @@ public class MouseMovement : NetworkBehaviour
         {
             playerBody.GetComponent<PlayerMovement>().jump();
         }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            // Unlock cursor and making it visible
+            Cursor.lockState = CursorLockMode.None;
+        }
     }
 
     void LateUpdate()
