@@ -7,7 +7,7 @@ public class PlayerMovement : NetworkBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     public AudioSource audioSource;
-    public AudioClip[] footstepSounds;
+    public AudioClip footstepSound;
     public AudioClip jumpSound;
     public AudioClip landSound;
     private CharacterController controller;
@@ -80,6 +80,7 @@ public class PlayerMovement : NetworkBehaviour
             inAir = false;
             audioSource.volume = 1f;
             audioSource.PlayOneShot(landSound);
+            landSoundServerRpc(audioSource.transform.position);
         }
 
         // Gravity and jumps
@@ -94,6 +95,7 @@ public class PlayerMovement : NetworkBehaviour
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             audioSource.volume = 1f;
             audioSource.PlayOneShot(jumpSound);
+            jumpSoundServerRpc(audioSource.transform.position);
             jumping = true;
         }
     }
@@ -137,14 +139,46 @@ public class PlayerMovement : NetworkBehaviour
 
     void PlayFootstep()
     {
-        audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
-        int footstepInd = UnityEngine.Random.Range(0, footstepSounds.Length);
-        audioSource.PlayOneShot(footstepSounds[footstepInd]);
+        audioSource.PlayOneShot(footstepSound);
+        walkSoundServerRpc(audioSource.transform.position);
     }
 
     public void leftRightTurn(float turnAngle)
     {
         leftRightAngle += turnAngle;
         transform.rotation = Quaternion.Euler(0, leftRightAngle, 0f);
+    }
+
+    [ServerRpc] void landSoundServerRpc(Vector3 location) 
+    {
+        landSoundClientRpc(location);
+    }
+
+    [ClientRpc] void landSoundClientRpc(Vector3 location) 
+    {
+        if (IsOwner) return;
+        AudioSource.PlayClipAtPoint(landSound, location);
+    }
+
+    [ServerRpc] void jumpSoundServerRpc(Vector3 location) 
+    {
+        jumpSoundClientRpc(location);
+    }
+
+    [ClientRpc] void jumpSoundClientRpc(Vector3 location) 
+    {
+        if (IsOwner) return;
+        AudioSource.PlayClipAtPoint(jumpSound, location);
+    }
+
+    [ServerRpc] void walkSoundServerRpc(Vector3 location) 
+    {
+        walkSoundClientRpc(location);
+    }
+
+    [ClientRpc] void walkSoundClientRpc(Vector3 location) 
+    {
+        if (IsOwner) return;
+        AudioSource.PlayClipAtPoint(footstepSound, location);
     }
 }
