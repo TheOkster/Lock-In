@@ -22,6 +22,9 @@ public class CreditsManager : MonoBehaviour
         creditsCloseButton.onClick.AddListener(HideCredits);
         instructionsCloseButton.onClick.AddListener(HideInstructions);
         quitButton.onClick.AddListener(QuitGame);
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
     public void ShowCredits()
     {
@@ -63,6 +66,7 @@ public class CreditsManager : MonoBehaviour
     }
     public void StartNewGame()
     {
-        SceneManager.LoadScene("LowPolyFPS_Lite_Demo");
+        mainMenuButtons.SetActive(false);
+        SceneManager.LoadScene("Scenes/LowPolyFPS_Lite_Demo");
     }
 }
