@@ -1,6 +1,7 @@
 using Unity.Mathematics;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using System;
 
 public class PlayerMovement : NetworkBehaviour
@@ -59,6 +60,21 @@ public class PlayerMovement : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            if (IsHost || IsServer)
+            {
+                // Host sends everyone to main menu
+                Debug.Log("Host is sending everyone to Main Menu");
+                LoadMainMenuClientRpc();
+            }
+            else
+            {
+                // Client leaves on their own
+                Debug.Log("Client leaving to Main Menu");
+                SceneManager.LoadScene("MainMenu");
+            }
+        }
         if (!IsOwner)
         {
             return;
@@ -176,9 +192,15 @@ public class PlayerMovement : NetworkBehaviour
         walkSoundClientRpc(location);
     }
 
-    [ClientRpc] void walkSoundClientRpc(Vector3 location) 
+    [ClientRpc] void walkSoundClientRpc(Vector3 location)
     {
         if (IsOwner) return;
         AudioSource.PlayClipAtPoint(footstepSound, location);
+    }
+    
+    [ClientRpc] void LoadMainMenuClientRpc()
+    {
+        Debug.Log("Loading Main Menu");
+        SceneManager.LoadScene("MainMenu");
     }
 }
